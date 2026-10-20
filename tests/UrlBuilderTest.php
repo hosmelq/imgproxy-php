@@ -6,6 +6,7 @@ use HosmelQ\Imgproxy\Exception\InvalidConfig;
 use HosmelQ\Imgproxy\GravityDirection;
 use HosmelQ\Imgproxy\HashsumType;
 use HosmelQ\Imgproxy\Imgproxy;
+use HosmelQ\Imgproxy\OptionName;
 use HosmelQ\Imgproxy\ResizingType;
 use HosmelQ\Imgproxy\Support\Gravity;
 use HosmelQ\Imgproxy\UrlBuilder;
@@ -26,7 +27,7 @@ it('builds a signed base64 URL', function (): void {
         ->useShortOptions();
 
     $source = 'https://example.com/images/curiosity.jpg';
-    $path = sprintf('/f:png/g:sm/rs:fill:300:400:0/%s.png', base64url($source));
+    $path = sprintf('/f:png/g:sm/rs:fill:300:400:0/%s', base64url($source));
     $expectedSignature = base64url(hash_hmac('sha256', hex2bin($salt).$path, hex2bin($key), true));
     $expected = 'https://imgproxy.example.com/'.$expectedSignature.$path;
 
@@ -40,12 +41,12 @@ it('builds insecure plain URL when no signature is configured', function (): voi
         ->usePlainSource();
 
     $source = 'https://example.com/assets/banner.jpg';
-    $expectedPath = sprintf('/format:webp/resize:fit:800:600/plain/%s@webp', rawurlencode($source));
+    $expectedPath = sprintf('/format:webp/resize:fit:800:600/plain/%s', rawurlencode($source));
 
     expect($builder->build($source))->toBe('https://imgproxy.test/insecure'.$expectedPath);
 });
 
-it('orders options deterministically', function (): void {
+it('preserves the configured option order', function (): void {
     $builder = Imgproxy::create('https://imgproxy.test')
         ->dpr(2)
         ->format('webp')
@@ -154,7 +155,7 @@ it('encodes complex options', function (): void {
         ->toContain('hashsum:sha256:f'.str_repeat('0', 63))
         ->toContain('watermark:0.5:soea:10:20:0.25')
         ->toContain('fallback_image_url:'.base64url('https://imgproxy.test/fallback.png'))
-        ->toContain('/cachebuster:v2/');
+        ->toContain('/cachebuster:djI/');
 });
 
 function base64url(string $value): string
@@ -168,3 +169,99 @@ function base64urlDecode(string $value): string
 
     return base64_decode(strtr($padded, '-_', '+/'), true);
 }
+
+it('matches the official signing example including source URL chunks', function (): void {
+    $url = Imgproxy::create('http://imgproxy.example.com', key: '736563726574', salt: '68656C6C6F')
+        ->resize(ResizingType::Fill, width: 300, height: 400, enlarge: false)
+        ->gravity(Gravity::smart())
+        ->sourceChunkSize(16)
+        ->useShortOptions()
+        ->build('http://example.com/images/curiosity.jpg', 'png');
+
+    expect($url)->toBe('http://imgproxy.example.com/oKfUtW34Dvo2BGQehJFR4Nr0_rIjOtdtzJ3QFsUcXH8/rs:fill:300:400:0/g:sm/aHR0cDovL2V4YW1w/bGUuY29tL2ltYWdl/cy9jdXJpb3NpdHku/anBn.png');
+});
+
+it('preserves sequential overrides of individual and meta options', function (): void {
+    $builder = Imgproxy::create('https://imgproxy.test');
+
+    $url = $builder->resize(ResizingType::Fit, height: 200)->height(300)->resize(height: 400)->height(500)->build('source');
+
+    expect($url)->toContain('/resize:fit::200/height:300/resize:::400/height:500/');
+    expect($builder->build('source'))->not->toContain('resize:');
+});
+
+it('keeps presets and repeated options in their requested order', function (): void {
+    $url = Imgproxy::create('https://imgproxy.test')
+        ->height(100)->preset(['first'])->height(200)->preset(['second'])->height(300)
+        ->build('source');
+
+    expect($url)->toContain('/height:100/preset:first/height:200/preset:second/height:300/');
+});
+
+it('supports independent options in chained pipelines', function (): void {
+    $url = Imgproxy::create('https://imgproxy.test')
+        ->width(500)->watermarkText('first')->nextPipeline()->width(200)->watermarkText('second')
+        ->build('source');
+
+    expect($url)->toContain('/width:500/watermark_text:Zmlyc3Q/-/width:200/watermark_text:c2Vjb25k/');
+});
+
+it('retains separators for valid omitted and reset arguments', function (): void {
+    $url = Imgproxy::create('https://imgproxy.test')->size()->resize(width: 200)->background()->trim()->build('source');
+
+    expect($url)->toContain('/size:/resize::200/background:/trim:/');
+});
+
+it('builds presets-only URLs with a custom argument separator', function (): void {
+    $url = Imgproxy::create('https://imgproxy.test')->argumentsSeparator(',')->onlyPresets()
+        ->preset(['thumbnail'])->preset(['sharp'])->usePlainSource()->build('local:///source.svg', 'png');
+
+    expect($url)->toContain('/thumbnail,sharp/plain/local%3A%2F%2F%2Fsource.svg@png');
+});
+
+it('selects aliases required by server allowlists', function (): void {
+    $url = Imgproxy::create('https://imgproxy.test')->format('png')->colorProfile('srgb')
+        ->optionAlias(OptionName::Format, 'ext')->optionAlias(OptionName::ColorProfile, 'icc')->build('source');
+
+    expect($url)->toContain('/ext:png/icc:srgb/');
+});
+
+it('puts SEO filenames after the encoded source extension', function (): void {
+    $url = Imgproxy::create('https://imgproxy.test')->sourceFilename('pretty image.jpg')->build('source', 'png');
+
+    expect($url)->toBe('https://imgproxy.test/insecure/c291cmNl.png/pretty%20image.jpg');
+});
+
+it('keeps output format as an ordered option unless an explicit final extension is provided', function (): void {
+    $builder = Imgproxy::create('https://imgproxy.test')->format('webp')->preset(['png']);
+
+    expect($builder->build('source'))->toEndWith('/format:webp/preset:png/c291cmNl');
+    expect($builder->build('source', 'jpg'))->toEndWith('/format:webp/preset:png/c291cmNl.jpg');
+});
+
+it('supports extension gravity in resize meta options', function (): void {
+    $url = Imgproxy::create('https://imgproxy.test')->resize(width: 200, extend: true, extendGravity: Gravity::focusPoint(0.2, 0.3))->build('source');
+
+    expect($url)->toContain('/resize::200:::1:fp:0.2:0.3/');
+});
+
+it('supports trusted signatures without changing the signed path grammar', function (): void {
+    expect(Imgproxy::create('https://imgproxy.test')->trustedSignature('trusted.v1~')->build('source'))
+        ->toBe('https://imgproxy.test/trusted.v1~/c291cmNl');
+});
+
+it('rejects separators that collide with option names or encoded sources', function (): void {
+    expect(fn (): string => Imgproxy::create('https://imgproxy.test')->argumentsSeparator('-')->minWidth(100)->build('source'))
+        ->toThrow(InvalidArgumentException::class)
+        ->and(fn (): string => Imgproxy::create('https://imgproxy.test')->argumentsSeparator('_')->build('???'))
+        ->toThrow(InvalidArgumentException::class)
+        ->and(fn (): string => Imgproxy::create('https://imgproxy.test')->argumentsSeparator('.')->build('source', 'png'))
+        ->toThrow(InvalidArgumentException::class);
+
+    expect(Imgproxy::create('https://imgproxy.test')->argumentsSeparator('-')->useShortOptions()->minWidth(100)->usePlainSource()->build('source'))
+        ->toBe('https://imgproxy.test/insecure/mw-100/plain/source');
+});
+
+it('requires a threshold for additional trim arguments', function (): void {
+    Imgproxy::create('https://imgproxy.test')->trim(colorHex: 'ff00ff');
+})->throws(InvalidArgumentException::class);

@@ -25,8 +25,8 @@ final readonly class Color
      */
     public static function fromHex(string $hex): self
     {
-        if (preg_match('/^[0-9a-fA-F]{6}$/', $hex) !== 1) {
-            throw new InvalidArgumentException('Hex color must be a 6-character hexadecimal string.');
+        if (preg_match('/^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/D', $hex) !== 1) {
+            throw new InvalidArgumentException('Hex color must be a 3- or 6-character hexadecimal string.');
         }
 
         return new self([strtolower($hex)]);

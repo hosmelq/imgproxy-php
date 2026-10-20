@@ -7,6 +7,7 @@ namespace HosmelQ\Imgproxy\Concerns;
 use HosmelQ\Imgproxy\HashsumType;
 use HosmelQ\Imgproxy\OptionName;
 use HosmelQ\Imgproxy\Support\ValueFormatter;
+use InvalidArgumentException;
 
 trait MiscOptions
 {
@@ -15,15 +16,15 @@ trait MiscOptions
      */
     public function cachebuster(string $value): self
     {
-        return $this->withOption(OptionName::Cachebuster, [$value]);
+        return $this->withOption(OptionName::Cachebuster, [ValueFormatter::base64UrlEncode($value)]);
     }
 
     /**
      * Set DPI metadata.
      */
-    public function dpi(int $dpi): self
+    public function dpi(float $dpi): self
     {
-        return $this->withOption(OptionName::Dpi, [(string) $dpi]);
+        return $this->withOption(OptionName::Dpi, [ValueFormatter::float($dpi)]);
     }
 
     /**
@@ -55,11 +56,12 @@ trait MiscOptions
      */
     public function filename(string $filename, null|bool $encoded = null): self
     {
-        $value = $encoded === true ? ValueFormatter::base64UrlEncode($filename) : rawurlencode($filename);
+        $encode = $encoded ?? str_contains($filename, ':');
+        $value = $encode ? ValueFormatter::base64UrlEncode($filename) : rawurlencode($filename);
 
         return $this->withOption(OptionName::Filename, [
             $value,
-            $this->boolOrNull($encoded),
+            $this->boolOrNull($encode ? true : $encoded),
         ]);
     }
 
@@ -85,9 +87,9 @@ trait MiscOptions
     /**
      * Limit animation frame resolution.
      */
-    public function maxAnimationFrameResolution(int $resolution): self
+    public function maxAnimationFrameResolution(float $resolution): self
     {
-        return $this->withOption(OptionName::MaxAnimationFrameResolution, [(string) $resolution]);
+        return $this->withOption(OptionName::MaxAnimationFrameResolution, [ValueFormatter::float($resolution)]);
     }
 
     /**
@@ -117,9 +119,9 @@ trait MiscOptions
     /**
      * Limit source resolution.
      */
-    public function maxSrcResolution(int $resolution): self
+    public function maxSrcResolution(float $resolution): self
     {
-        return $this->withOption(OptionName::MaxSrcResolution, [(string) $resolution]);
+        return $this->withOption(OptionName::MaxSrcResolution, [ValueFormatter::float($resolution)]);
     }
 
     /**
@@ -129,6 +131,10 @@ trait MiscOptions
      */
     public function preset(array $presets): self
     {
+        if ($presets === []) {
+            throw new InvalidArgumentException('At least one preset is required.');
+        }
+
         return $this->withOption(OptionName::Preset, $presets);
     }
 
@@ -155,6 +161,10 @@ trait MiscOptions
      */
     public function skipProcessing(array $extensions): self
     {
+        if ($extensions === []) {
+            throw new InvalidArgumentException('At least one format is required.');
+        }
+
         return $this->withOption(OptionName::SkipProcessing, $extensions);
     }
 
