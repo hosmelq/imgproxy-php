@@ -13,6 +13,7 @@ enum OptionName: string
     case Background = 'background';
     case BackgroundAlpha = 'background_alpha';
     case Blur = 'blur';
+    case BlurAreas = 'blur_areas';
     case BlurDetections = 'blur_detections';
     case Brightness = 'brightness';
     case Cachebuster = 'cachebuster';
@@ -21,6 +22,7 @@ enum OptionName: string
     case Contrast = 'contrast';
     case Crop = 'crop';
     case CropAspectRatio = 'crop_aspect_ratio';
+    case CropObjects = 'crop_objects';
     case DisableAnimation = 'disable_animation';
     case Dpi = 'dpi';
     case Dpr = 'dpr';
@@ -57,6 +59,7 @@ enum OptionName: string
     case Pages = 'pages';
     case Pixelate = 'pixelate';
     case PngOptions = 'png_options';
+    case PreserveHdr = 'preserve_hdr';
     case Preset = 'preset';
     case Quality = 'quality';
     case Raw = 'raw';
@@ -89,20 +92,23 @@ enum OptionName: string
     case Zoom = 'zoom';
 
     /**
-     * Return options in canonical ordering for deterministic URLs.
+     * Return all server-supported names for this option.
      *
-     * @return list<self>
+     * @return list<string>
      */
-    public static function ordered(): array
+    public function aliases(): array
     {
-        $cases = self::cases();
+        $extra = match ($this) {
+            self::ColorProfile => ['icc'],
+            self::CropAspectRatio => ['crop_ar'],
+            self::ExtendAspectRatio => ['extend_ar'],
+            self::Format => ['ext'],
+            self::ObjectsPosition => ['obj_pos'],
+            self::WatermarkRotate => ['wm_rot'],
+            default => [],
+        };
 
-        usort(
-            $cases,
-            fn (self $first, self $second): int => $first->value <=> $second->value
-        );
-
-        return $cases;
+        return array_values(array_unique([$this->value, $this->name(true), ...$extra]));
     }
 
     /**
@@ -121,6 +127,7 @@ enum OptionName: string
             self::AvifOptions => 'avifo',
             self::Background => 'bg',
             self::BackgroundAlpha => 'bga',
+            self::BlurAreas => 'ba',
             self::Blur => 'bl',
             self::BlurDetections => 'bd',
             self::Brightness => 'br',
@@ -129,6 +136,7 @@ enum OptionName: string
             self::Colorize => 'col',
             self::Contrast => 'co',
             self::Crop => 'c',
+            self::CropObjects => 'c_obj',
             self::CropAspectRatio => 'car',
             self::DisableAnimation => 'da',
             self::Dpi => 'dpi',
@@ -166,6 +174,7 @@ enum OptionName: string
             self::Pages => 'pgs',
             self::Pixelate => 'pix',
             self::PngOptions => 'pngo',
+            self::PreserveHdr => 'ph',
             self::Preset => 'pr',
             self::Quality => 'q',
             self::Raw => 'raw',

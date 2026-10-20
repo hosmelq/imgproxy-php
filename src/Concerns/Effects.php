@@ -7,14 +7,18 @@ namespace HosmelQ\Imgproxy\Concerns;
 use HosmelQ\Imgproxy\OptionName;
 use HosmelQ\Imgproxy\Support\Color;
 use HosmelQ\Imgproxy\Support\ValueFormatter;
+use InvalidArgumentException;
 
 trait Effects
 {
     /**
      * Combined brightness/contrast/saturation.
      */
-    public function adjust(null|int $brightness = null, null|float $contrast = null, null|float $saturation = null): self
-    {
+    public function adjust(
+        null|int $brightness = null,
+        null|float $contrast = null,
+        null|float $saturation = null,
+    ): self {
         return $this->withOption(OptionName::Adjust, [
             $this->intOrNull($brightness),
             $this->floatOrNull($contrast),
@@ -25,9 +29,9 @@ trait Effects
     /**
      * Set background color.
      */
-    public function background(Color $color): self
+    public function background(null|Color $color = null): self
     {
-        return $this->withOption(OptionName::Background, $color->arguments());
+        return $this->withOption(OptionName::Background, $color?->arguments() ?? []);
     }
 
     /**
@@ -44,6 +48,32 @@ trait Effects
     public function blur(float $sigma): self
     {
         return $this->withOption(OptionName::Blur, [ValueFormatter::float($sigma)]);
+    }
+
+    /**
+     * Blur explicitly selected source-relative rectangles.
+     *
+     * @param list<array{left: float, top: float, width: float, height: float}> $areas
+     */
+    public function blurAreas(float $sigma, array $areas = []): self
+    {
+        $arguments = [ValueFormatter::float($sigma)];
+
+        foreach ($areas as $area) {
+            foreach (['left', 'top', 'width', 'height'] as $coordinate) {
+                $value = $area[$coordinate];
+
+                if ($value < 0 || $value > 1) {
+                    throw new InvalidArgumentException(
+                        'Blur area coordinates must be between 0 and 1.',
+                    );
+                }
+
+                $arguments[] = ValueFormatter::float($value);
+            }
+        }
+
+        return $this->withOption(OptionName::BlurAreas, $arguments);
     }
 
     /**
@@ -70,8 +100,11 @@ trait Effects
     /**
      * Apply color overlay.
      */
-    public function colorize(float $opacity, null|string $hexColor = null, null|bool $keepAlpha = null): self
-    {
+    public function colorize(
+        float $opacity,
+        null|string $hexColor = null,
+        null|bool $keepAlpha = null,
+    ): self {
         return $this->withOption(OptionName::Colorize, [
             ValueFormatter::float($opacity),
             is_null($hexColor) ? null : strtolower($hexColor),
@@ -84,7 +117,10 @@ trait Effects
      */
     public function colorProfile(string $profile): self
     {
-        return $this->withOption(OptionName::ColorProfile, [$profile]);
+        return $this->withOption(
+            OptionName::ColorProfile,
+            [str_replace('%3A', ':', rawurlencode($profile))],
+        );
     }
 
     /**
@@ -111,8 +147,11 @@ trait Effects
     /**
      * Apply duotone effect.
      */
-    public function duotone(float $intensity, null|string $darkHex = null, null|string $lightHex = null): self
-    {
+    public function duotone(
+        float $intensity,
+        null|string $darkHex = null,
+        null|string $lightHex = null,
+    ): self {
         return $this->withOption(OptionName::Duotone, [
             ValueFormatter::float($intensity),
             is_null($darkHex) ? null : strtolower($darkHex),
@@ -128,7 +167,7 @@ trait Effects
         null|string $hexColor = null,
         null|float|string $direction = null,
         null|float $start = null,
-        null|float $stop = null
+        null|float $stop = null,
     ): self {
         $directionValue = match (true) {
             is_string($direction) => $direction,
@@ -191,12 +230,15 @@ trait Effects
     /**
      * Configure unsharp masking.
      */
-    public function unsharpMasking(null|string $mode = null, null|float $weight = null, null|int $divider = null): self
-    {
+    public function unsharpMasking(
+        null|string $mode = null,
+        null|float $weight = null,
+        null|float $divider = null,
+    ): self {
         return $this->withOption(OptionName::UnsharpMasking, [
             $mode,
             $this->floatOrNull($weight),
-            $this->intOrNull($divider),
+            $this->floatOrNull($divider),
         ]);
     }
 }

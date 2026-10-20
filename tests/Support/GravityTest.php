@@ -6,7 +6,11 @@ use HosmelQ\Imgproxy\GravityDirection;
 use HosmelQ\Imgproxy\Support\Gravity;
 
 it('builds directional gravities with offsets', function (): void {
-    expect(Gravity::direction(GravityDirection::SouthEast, 0.2, 0.4)->arguments())->toBe(['soea', '0.2', '0.4']);
+    expect(Gravity::direction(GravityDirection::SouthEast, 0.2, 0.4)->arguments())->toBe([
+        'soea',
+        '0.2',
+        '0.4',
+    ]);
 });
 
 it('builds focus point gravity', function (): void {

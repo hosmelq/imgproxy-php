@@ -1,39 +1,20 @@
 # imgproxy PHP
 
-Build imgproxy URLs in PHP with optional encryption and signing.
-
-## Introduction
-
-This package generates imgproxy URLs with every documented option (free and pro) and signs requests when you provide a key/salt pair. Long option names are emitted by default, and you can switch to the short aliases that imgproxy supports.
-
-```php
-use HosmelQ\Imgproxy\Imgproxy;
-use HosmelQ\Imgproxy\ResizingType;
-
-$url = Imgproxy::create(baseUrl: 'https://imgproxy.example.com')
-    ->format(extension: 'png')
-    ->resize(type: ResizingType::Fit, width: 1200, height: 630)
-    ->build(sourceUrl: 'https://example.com/image.jpg');
-```
+Build signed processing and image-info URLs for imgproxy 4.0.x, including all
+84 processing options and 32 info options. Pro features require imgproxy Pro.
 
 ## Requirements
 
-- PHP 8.3+
-- OpenSSL extension (for source encryption)
+- PHP 8.4+
+- OpenSSL extension
 
-## Installation & setup
-
-Install via Composer:
+## Installation
 
 ```bash
 composer require hosmelq/imgproxy
 ```
 
-## Basic usage
-
-### Getting started
-
-Create a builder with your base URL and optional signing key/salt. Configure processing options fluently, then build the URL for a source image.
+## Process images
 
 ```php
 use HosmelQ\Imgproxy\Imgproxy;
@@ -42,105 +23,103 @@ use HosmelQ\Imgproxy\Support\Gravity;
 
 $builder = Imgproxy::create(
     baseUrl: 'https://imgproxy.example.com',
-    key: 'b397f17682dea6270ac06941ca1e3f0f',
-    salt: '68de0f586bdb701cf2458565bf5a6aec'
+    key: $key,
+    salt: $salt,
 );
 
 $url = $builder
-    ->format(extension: 'png')
-    ->gravity(gravity: Gravity::smart())
-    ->quality(quality: 80)
-    ->resize(type: ResizingType::Fit, width: 1200, height: 630)
-    ->build(sourceUrl: 'https://example.com/product.jpg');
+    ->resize(ResizingType::Fill, width: 1200, height: 630)
+    ->gravity(Gravity::smart())
+    ->format('webp')
+    ->build('https://example.com/image.jpg');
 ```
 
-Switch to short option names if you want more compact URLs:
+Key and salt are hex-encoded. Omit both to produce unsigned URLs, or set
+`signatureSize` to match the server's truncated signatures. Include any server
+path prefix in `baseUrl`.
+
+Builders are immutable. Options and presets are applied in call order, including
+repeated options. `format()` adds an ordered processing option; an explicit
+`build(..., extension: 'png')` sets the final extension and takes precedence.
+
+## Read image information (Pro)
 
 ```php
-$shortUrl = $builder
-    ->useShortOptions()
-    ->build(sourceUrl: 'https://example.com/product.jpg');
+$url = Imgproxy::createInfo('https://imgproxy.example.com', key: $key, salt: $salt)
+    ->dimensions()
+    ->exif(canonicalNames: true)
+    ->dominantColors()
+    ->blurhash(4, 3)
+    ->build('https://example.com/image.jpg');
 ```
 
-### Source encoding choices
+The info builder uses the `/info` endpoint and its own option namespace. Both
+builders generate URLs; your application makes the HTTP request. Configure
+request headers, storage, caching and monitoring on the imgproxy server.
 
-Base64 is the default. You can output plain or encrypted sources when needed:
+## Configure URL syntax
+
+Both builders support:
+
+| Method | Server contract |
+| --- | --- |
+| `argumentsSeparator(',')` | `IMGPROXY_ARGUMENTS_SEPARATOR` |
+| `onlyPresets()->preset(['thumbnail', 'sharp'])` | `IMGPROXY_ONLY_PRESETS` or `IMGPROXY_INFO_ONLY_PRESETS` |
+| `sourceFilename('product.jpg')` | `IMGPROXY_BASE64_URL_INCLUDES_FILENAME` |
+| `sourceChunkSize(16)` | Split Base64 or encrypted sources across path segments |
+| `trustedSignature('trusted')` | A value explicitly allowed by `IMGPROXY_TRUSTED_SIGNATURES` |
+| `useShortOptions()` / `useLongOptions()` | Documented short or canonical option names |
+| `optionAlias(OptionName::Format, 'ext')` | Exact aliases for server option allowlists |
+
+Use `InfoOptionName` for aliases on the info builder. Presets-only URLs require
+at least one preset and cannot contain ordinary options or explicit pipelines.
+Use `trustedSignature(null)` to restore HMAC signing or the unsigned default.
+
+## Encode sources
+
+Sources use URL-safe Base64 by default. Select `usePlainSource()` for escaped
+plain URLs, or `useEncryptedSource()->withEncryptionKey($encryptionKey)` for
+AES-CBC source encryption with imgproxy Pro. Encryption keys are hex-encoded and decode to
+16, 24 or 32 bytes.
+
+Encryption uses a deterministic IV for each source so identical URLs can be
+cached. An optional `ivGenerator` closure receives the source URL and must return
+exactly 16 bytes. Sign encrypted URLs to prevent tampering.
+
+## Chain pipelines
 
 ```php
-use HosmelQ\Imgproxy\Imgproxy;
-use HosmelQ\Imgproxy\SourceEncoding;
-
-// Plain source (no signature if key/salt are omitted)
-$plainUrl = Imgproxy::create(baseUrl: 'https://imgproxy.example.com')
-    ->format(extension: 'png')
-    ->usePlainSource()
-    ->build(sourceUrl: 'https://example.com/product.jpg');
-
-// Encrypted source (pro)
-$encryptedUrl = Imgproxy::create(baseUrl: 'https://imgproxy.example.com')
-    ->format(extension: 'png')
-    ->useEncryptedSource()
-    ->withEncryptionKey(key: '1eb5b0e971ad7f45324c1bb15c947cb207c43152fa5c6c7f35c4f36e0c18e0f1')
-    ->build(sourceUrl: 'https://example.com/private.jpg', encoding: SourceEncoding::Encrypted);
+$url = $builder
+    ->width(500)
+    ->watermarkText('First')
+    ->nextPipeline()
+    ->watermarkText('Second')
+    ->build('https://example.com/image.jpg');
 ```
 
-### Signing and truncation
+Each pipeline keeps its own ordered options. Chained pipelines require Pro.
 
-Provide both key and salt to enable signing, optionally truncate the signature to match your imgproxy config:
+## API coverage
 
-```php
-use HosmelQ\Imgproxy\Imgproxy;
+See the [API audit](https://github.com/hosmelq/imgproxy-php/blob/main/docs/imgproxy-api-audit.md) for the complete option signatures,
+aliases, argument domains and server configuration inventory. Unreleased upstream
+options are listed separately from the supported stable contract.
 
-$signed = Imgproxy::create(
-    baseUrl: 'https://imgproxy.example.com',
-    key: 'b397f17682dea6270ac06941ca1e3f0f',
-    salt: '68de0f586bdb701cf2458565bf5a6aec',
-    signatureSize: 12,
-)
-    ->format(extension: 'png')
-    ->build(sourceUrl: 'https://example.com/product.jpg');
-```
-
-## Advanced usage
-
-### Custom IV generator for encrypted sources
-
-Pass your own IV generator to `withEncryptionKey` when you need a specific IV strategy (for example, to align with another language implementation):
-
-```php
-use HosmelQ\Imgproxy\Imgproxy;
-
-$url = Imgproxy::create(baseUrl: 'https://imgproxy.example.com')
-    ->format(extension: 'png')
-    ->useEncryptedSource()
-    ->withEncryptionKey(
-        key: '1eb5b0e971ad7f45324c1bb15c947cb207c43152fa5c6c7f35c4f36e0f199a',
-        ivGenerator: fn (): string => random_bytes(16)
-    )
-    ->build(sourceUrl: 'https://example.com/private.jpg');
-```
-
-## Testing
+## Development
 
 ```bash
+composer install
 composer test
+composer phpstan
 ```
 
-## Deployments
-
-Want a ready-to-run imgproxy instance? Use the Railway template:
-
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/imgproxy?referralCode=i6jUWN&utm_medium=integration&utm_source=template&utm_campaign=generic)
+The public API targets imgproxy 4.0.18. Pro option serialization follows the
+official contract; exercising Pro transformations requires a licensed server.
 
 ## Changelog
 
-Please see [CHANGELOG.md](CHANGELOG.md) for recent changes.
-
-## Credits
-
-- [Hosmel Quintana](https://github.com/hosmelq)
-- [All Contributors](../../contributors)
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
-The MIT License (MIT). Please see [LICENSE.md](LICENSE.md) for more information.
+The [MIT License](LICENSE.md).

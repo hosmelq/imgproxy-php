@@ -10,6 +10,7 @@ use HosmelQ\Imgproxy\ResizingType;
 use HosmelQ\Imgproxy\Support\Gravity;
 use HosmelQ\Imgproxy\Support\ObjectsPosition;
 use HosmelQ\Imgproxy\Support\ValueFormatter;
+use InvalidArgumentException;
 
 trait ResizingOptions
 {
@@ -24,11 +25,14 @@ trait ResizingOptions
     /**
      * Crop before resize.
      */
-    public function crop(null|float $width = null, null|float $height = null, null|Gravity $gravity = null): self
-    {
+    public function crop(
+        null|float $width = null,
+        null|float $height = null,
+        null|Gravity $gravity = null,
+    ): self {
         $arguments = [
-            $this->floatOrNull($width),
-            $this->floatOrNull($height),
+            $this->floatOrNull($width ?? 0.0),
+            $this->floatOrNull($height ?? 0.0),
         ];
 
         if (! is_null($gravity)) {
@@ -47,6 +51,19 @@ trait ResizingOptions
             ValueFormatter::float($aspectRatio),
             $this->boolOrNull($enlarge),
         ]);
+    }
+
+    /**
+     * Crop around detected objects of the selected classes.
+     *
+     * @param list<string> $classes
+     */
+    public function cropObjects(float $scaleFactor, array $classes = []): self
+    {
+        return $this->withOption(
+            OptionName::CropObjects,
+            [ValueFormatter::float($scaleFactor), ...$classes],
+        );
     }
 
     /**
@@ -73,7 +90,7 @@ trait ResizingOptions
         $arguments = [$this->bool($extend)];
 
         if (! is_null($gravity)) {
-            $arguments = [...$arguments, ...$gravity->arguments()];
+            $arguments = [...$arguments, ...$gravity->extensionArguments()];
         }
 
         return $this->withOption(OptionName::Extend, $arguments);
@@ -87,7 +104,7 @@ trait ResizingOptions
         $arguments = [$this->bool($extend)];
 
         if (! is_null($gravity)) {
-            $arguments = [...$arguments, ...$gravity->arguments()];
+            $arguments = [...$arguments, ...$gravity->extensionArguments()];
         }
 
         return $this->withOption(OptionName::ExtendAspectRatio, $arguments);
@@ -147,13 +164,21 @@ trait ResizingOptions
     /**
      * Apply padding.
      */
-    public function padding(null|float $top = null, null|float $right = null, null|float $bottom = null, null|float $left = null): self
-    {
+    public function padding(
+        null|int $top = null,
+        null|int $right = null,
+        null|int $bottom = null,
+        null|int $left = null,
+    ): self {
+        if (is_null($top) && is_null($right) && is_null($bottom) && is_null($left)) {
+            throw new InvalidArgumentException('At least one padding side is required.');
+        }
+
         return $this->withOption(OptionName::Padding, [
-            $this->floatOrNull($top),
-            $this->floatOrNull($right),
-            $this->floatOrNull($bottom),
-            $this->floatOrNull($left),
+            $this->intOrNull($top),
+            $this->intOrNull($right),
+            $this->intOrNull($bottom),
+            $this->intOrNull($left),
         ]);
     }
 
@@ -161,18 +186,26 @@ trait ResizingOptions
      * Apply resize meta option.
      */
     public function resize(
-        ResizingType $type,
+        null|ResizingType $type = null,
         null|int $width = null,
         null|int $height = null,
         null|bool $enlarge = null,
-        null|bool $extend = null
+        null|bool $extend = null,
+        null|Gravity $extendGravity = null,
     ): self {
+        if (! is_null($extendGravity) && is_null($extend)) {
+            throw new InvalidArgumentException(
+                'Extend must be specified when extension gravity is provided.',
+            );
+        }
+
         return $this->withOption(OptionName::Resize, [
-            $type->value,
+            $type?->value,
             $this->intOrNull($width),
             $this->intOrNull($height),
             $this->boolOrNull($enlarge),
             $this->boolOrNull($extend),
+            ...($extendGravity?->extensionArguments() ?? []),
         ]);
     }
 
@@ -203,23 +236,48 @@ trait ResizingOptions
     /**
      * Set resulting size.
      */
-    public function size(null|int $width = null, null|int $height = null, null|bool $enlarge = null, null|bool $extend = null): self
-    {
+    public function size(
+        null|int $width = null,
+        null|int $height = null,
+        null|bool $enlarge = null,
+        null|bool $extend = null,
+        null|Gravity $extendGravity = null,
+    ): self {
+        if (! is_null($extendGravity) && is_null($extend)) {
+            throw new InvalidArgumentException(
+                'Extend must be specified when extension gravity is provided.',
+            );
+        }
+
         return $this->withOption(OptionName::Size, [
             $this->intOrNull($width),
             $this->intOrNull($height),
             $this->boolOrNull($enlarge),
             $this->boolOrNull($extend),
+            ...($extendGravity?->extensionArguments() ?? []),
         ]);
     }
 
     /**
      * Trim background.
      */
-    public function trim(int $threshold, null|string $colorHex = null, null|bool $equalHorizontal = null, null|bool $equalVertical = null): self
-    {
+    public function trim(
+        null|float $threshold = null,
+        null|string $colorHex = null,
+        null|bool $equalHorizontal = null,
+        null|bool $equalVertical = null,
+    ): self {
+        if (
+            is_null($threshold)
+            && (! is_null($colorHex) || ! is_null($equalHorizontal) || ! is_null($equalVertical))
+        ) {
+            throw new InvalidArgumentException(
+                'Trim threshold must be specified when other trim arguments are provided.',
+            );
+        }
+
         return $this->withOption(OptionName::Trim, [
-            (string) $threshold,
+            $this->floatOrNull($threshold),
             is_null($colorHex) ? null : strtolower($colorHex),
             $this->boolOrNull($equalHorizontal),
             $this->boolOrNull($equalVertical),

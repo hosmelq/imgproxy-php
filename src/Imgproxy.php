@@ -25,7 +25,7 @@ final class Imgproxy
         null|string $key = null,
         null|string $salt = null,
         null|int $signatureSize = null,
-        bool $useShortOptions = false
+        bool $useShortOptions = false,
     ): UrlBuilder {
         $key = is_null($key) ? null : self::decodeHex($key, 'key');
         $salt = is_null($salt) ? null : self::decodeHex($salt, 'salt');
@@ -47,7 +47,43 @@ final class Imgproxy
             signatureSize: $signatureSize,
             useShortOptions: $useShortOptions,
             sourceEncoding: SourceEncoding::Base64,
-            encryption: null
+            encryption: null,
+        );
+    }
+
+    /**
+     * Create a new image-info URL builder.
+     *
+     * @throws InvalidConfig
+     */
+    public static function createInfo(
+        string $baseUrl,
+        null|string $key = null,
+        null|string $salt = null,
+        null|int $signatureSize = null,
+        bool $useShortOptions = false,
+    ): InfoUrlBuilder {
+        $key = is_null($key) ? null : self::decodeHex($key, 'key');
+        $salt = is_null($salt) ? null : self::decodeHex($salt, 'salt');
+
+        if ((is_null($key) xor is_null($salt))) {
+            throw InvalidConfig::missingSigningPair();
+        }
+
+        if (! is_null($signatureSize) && ($signatureSize < 1 || $signatureSize > 32)) {
+            throw InvalidConfig::invalidSignatureSize();
+        }
+
+        $normalizedBaseUrl = rtrim($baseUrl, '/');
+
+        return new InfoUrlBuilder(
+            baseUrl: $normalizedBaseUrl,
+            key: $key,
+            salt: $salt,
+            signatureSize: $signatureSize,
+            useShortOptions: $useShortOptions,
+            sourceEncoding: SourceEncoding::Base64,
+            encryption: null,
         );
     }
 

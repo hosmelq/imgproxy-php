@@ -18,7 +18,7 @@ trait WatermarkOptions
         null|WatermarkPosition $position = null,
         null|float $xOffset = null,
         null|float $yOffset = null,
-        null|float $scale = null
+        null|float $scale = null,
     ): self {
         return $this->withOption(OptionName::Watermark, [
             ValueFormatter::float($opacity),
@@ -58,7 +58,10 @@ trait WatermarkOptions
      */
     public function watermarkText(string $text): self
     {
-        return $this->withOption(OptionName::WatermarkText, [ValueFormatter::base64UrlEncode($text)]);
+        return $this->withOption(
+            OptionName::WatermarkText,
+            [ValueFormatter::base64UrlEncode($text)],
+        );
     }
 
     /**

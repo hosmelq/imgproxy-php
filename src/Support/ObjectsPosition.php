@@ -11,9 +11,7 @@ final readonly class ObjectsPosition
     /**
      * @param list<string> $arguments
      */
-    private function __construct(private array $arguments)
-    {
-    }
+    private function __construct(private array $arguments) {}
 
     /**
      * Position objects using directional gravity.
@@ -21,7 +19,7 @@ final readonly class ObjectsPosition
     public static function direction(
         GravityDirection $direction,
         float $xOffset = 0.0,
-        float $yOffset = 0.0
+        float $yOffset = 0.0,
     ): self {
         $arguments = [$direction->value];
 

@@ -15,8 +15,15 @@ use HosmelQ\Imgproxy\UrlBuilder;
 use HosmelQ\Imgproxy\WatermarkPosition;
 
 it('builds signed Base64 URL with all options', function (): void {
-    $url = fullyConfiguredBuilder()
-        ->build('https://example.com/source.jpg', 'jpg');
+    $url = fullyConfiguredBuilder()->build('https://example.com/source.jpg', 'jpg');
+
+    expect($url)->toMatchSnapshot();
+});
+
+it('builds signed encrypted URL with all options', function (): void {
+    $builder = fullyConfiguredBuilder()
+        ->withEncryptionKey('1eb5b0e971ad7f45324c1bb15c947cb207c43152fa5c6c7f35c4f36e0c18e0f1');
+    $url = $builder->build('https://example.com/source.jpg', 'jpg', SourceEncoding::Encrypted);
 
     expect($url)->toMatchSnapshot();
 });
@@ -28,29 +35,21 @@ it('builds signed plain URL with all options', function (): void {
     expect($url)->toMatchSnapshot();
 });
 
-it('builds signed encrypted URL with all options', function (): void {
-    $builder = fullyConfiguredBuilder()
-        ->withEncryptionKey('1eb5b0e971ad7f45324c1bb15c947cb207c43152fa5c6c7f35c4f36e0c18e0f1');
-
-    $url = $builder->build('https://example.com/source.jpg', 'jpg', SourceEncoding::Encrypted);
-
-    expect($url)->toMatchSnapshot();
-});
-
 function fullyConfiguredBuilder(): UrlBuilder
 {
     return Imgproxy::create(
         baseUrl: 'https://imgproxy.test',
         key: '736563726574',
-        salt: '68656c6c6f'
+        salt: '68656c6c6f',
     )
         ->adjust(brightness: 10, contrast: 1.1, saturation: 0.9)
         ->autoRotate()
-        ->autoquality(method: 'good', target: 80, min: 60, max: 90, allowedError: 0.1)
+        ->autoquality(method: 'dssim', target: 0.02, min: 60, max: 90, allowedError: 0.1)
         ->avifOptions('444')
         ->background(Color::fromRgb(255, 255, 255))
         ->backgroundAlpha(0.5)
         ->blur(2.5)
+        ->blurAreas(2.0, [['left' => 0.1, 'top' => 0.2, 'width' => 0.3, 'height' => 0.4]])
         ->blurDetections(1.2, ['all'])
         ->brightness(5)
         ->cachebuster('v3')
@@ -59,6 +58,7 @@ function fullyConfiguredBuilder(): UrlBuilder
         ->contrast(1.2)
         ->crop(0.8, 0.6, Gravity::objectWithWeights(['face' => 2, 'all' => 1]))
         ->cropAspectRatio(1.33, true)
+        ->cropObjects(1.2, ['face'])
         ->disableAnimation()
         ->dpi(300)
         ->dpr(2.5)
@@ -66,7 +66,7 @@ function fullyConfiguredBuilder(): UrlBuilder
         ->duotone(0.6, '000000', 'ffffff')
         ->enforceThumbnail()
         ->enlarge()
-        ->expires(4102444800)
+        ->expires(4_102_444_800)
         ->extend(true, Gravity::direction(GravityDirection::SouthEast, 0.2, 0.1))
         ->extendAspectRatio(true, Gravity::focusPoint(0.25, 0.75))
         ->fallbackImageUrl('https://imgproxy.test/fallback.png')
@@ -78,14 +78,21 @@ function fullyConfiguredBuilder(): UrlBuilder
         ->gravity(Gravity::object(['face']))
         ->hashsum(HashsumType::Sha1, 'abc123')
         ->height(400)
-        ->jpegOptions(progressive: true, noSubsample: true, trellisQuant: true, overshootDeringing: true, optimizeScans: true, quantTable: 3)
+        ->jpegOptions(
+            progressive: true,
+            noSubsample: true,
+            trellisQuant: true,
+            overshootDeringing: true,
+            optimizeScans: true,
+            quantTable: 3,
+        )
         ->keepCopyright()
-        ->maxAnimationFrameResolution(100000)
+        ->maxAnimationFrameResolution(100_000)
         ->maxAnimationFrames(5)
-        ->maxBytes(1024)
-        ->maxResultDimension(4000)
-        ->maxSrcFileSize(1000000)
-        ->maxSrcResolution(9000)
+        ->maxBytes(1_024)
+        ->maxResultDimension(4_000)
+        ->maxSrcFileSize(1_000_000)
+        ->maxSrcResolution(9_000)
         ->minHeight(150)
         ->minWidth(200)
         ->monochrome(0.4, 'b3b3b3')
@@ -96,7 +103,10 @@ function fullyConfiguredBuilder(): UrlBuilder
         ->pixelate(3)
         ->pngOptions(interlaced: true, quantize: true, quantizationColors: 128)
         ->preset(['one', 'two'])
+        ->preserveHdr()
         ->quality(75)
+        ->raw(false)
+        ->resize(ResizingType::Fit, width: 500, height: 400)
         ->resizingAlgorithm(ResizingAlgorithm::Cubic)
         ->resizingType(ResizingType::FillDown)
         ->returnAttachment()
@@ -109,12 +119,34 @@ function fullyConfiguredBuilder(): UrlBuilder
         ->stripMetadata()
         ->style('svg { display: none; }')
         ->trim(10, 'ffffff', equalHorizontal: true, equalVertical: false)
-        ->unsharpMasking('medium', 0.3, 2)
+        ->unsharpMasking('always', 0.3, 24.5)
         ->useShortOptions()
-        ->videoThumbnailAnimation(step: 1.5, delay: 100, frames: 3, frameWidth: 100, frameHeight: 60, extendFrame: true, trim: true, fill: true, focusX: 0.5, focusY: 0.5)
+        ->videoThumbnailAnimation(
+            step: 1.5,
+            delay: 100,
+            frames: 3,
+            frameWidth: 100,
+            frameHeight: 60,
+            extendFrame: true,
+            trim: true,
+            fill: true,
+            focusX: 0.5,
+            focusY: 0.5,
+        )
         ->videoThumbnailKeyframes()
         ->videoThumbnailSecond(2.0)
-        ->videoThumbnailTile(step: 1.0, columns: 2, rows: 2, tileWidth: 120, tileHeight: 80, extendTile: true, trim: true, fill: true, focusX: 0.5, focusY: 0.5)
+        ->videoThumbnailTile(
+            step: 1.0,
+            columns: 2,
+            rows: 2,
+            tileWidth: 120,
+            tileHeight: 80,
+            extendTile: true,
+            trim: true,
+            fill: true,
+            focusX: 0.5,
+            focusY: 0.5,
+        )
         ->watermark(0.5, WatermarkPosition::Chessboard, xOffset: 5, yOffset: 6, scale: 0.2)
         ->watermarkRotate(45)
         ->watermarkShadow(1.1)

@@ -22,7 +22,7 @@ trait VideoOptions
         null|bool $trim = null,
         null|bool $fill = null,
         null|float $focusX = null,
-        null|float $focusY = null
+        null|float $focusY = null,
     ): self {
         return $this->withOption(OptionName::VideoThumbnailAnimation, [
             ValueFormatter::float($step),
@@ -51,7 +51,10 @@ trait VideoOptions
      */
     public function videoThumbnailSecond(float $second): self
     {
-        return $this->withOption(OptionName::VideoThumbnailSecond, [ValueFormatter::float($second)]);
+        return $this->withOption(
+            OptionName::VideoThumbnailSecond,
+            [ValueFormatter::float($second)],
+        );
     }
 
     /**
@@ -67,7 +70,7 @@ trait VideoOptions
         null|bool $trim = null,
         null|bool $fill = null,
         null|float $focusX = null,
-        null|float $focusY = null
+        null|float $focusY = null,
     ): self {
         return $this->withOption(OptionName::VideoThumbnailTile, [
             ValueFormatter::float($step),

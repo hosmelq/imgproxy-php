@@ -5,17 +5,23 @@ declare(strict_types=1);
 namespace HosmelQ\Imgproxy\Concerns;
 
 use HosmelQ\Imgproxy\OptionName;
+use InvalidArgumentException;
 
 trait FormatOptions
 {
     /**
      * Configure autoquality.
      */
-    public function autoquality(null|string $method = null, null|int $target = null, null|int $min = null, null|int $max = null, null|float $allowedError = null): self
-    {
+    public function autoquality(
+        null|string $method = null,
+        null|float $target = null,
+        null|int $min = null,
+        null|int $max = null,
+        null|float $allowedError = null,
+    ): self {
         return $this->withOption(OptionName::Autoquality, [
             $method,
-            $this->intOrNull($target),
+            $this->floatOrNull($target),
             $this->intOrNull($min),
             $this->intOrNull($max),
             $this->floatOrNull($allowedError),
@@ -39,13 +45,11 @@ trait FormatOptions
     }
 
     /**
-     * Set output format and default extension.
+     * Set output format without adding a second conflicting format to the URL.
      */
     public function format(string $extension): self
     {
-        $builder = $this->withOption(OptionName::Format, [$extension]);
-
-        return $builder->copy(defaultExtension: $extension);
+        return $this->withOption(OptionName::Format, [$extension]);
     }
 
     /**
@@ -55,6 +59,10 @@ trait FormatOptions
      */
     public function formatQuality(array $formatQualities): self
     {
+        if ($formatQualities === []) {
+            throw new InvalidArgumentException('At least one format quality is required.');
+        }
+
         $arguments = [];
 
         foreach ($formatQualities as $format => $value) {
@@ -74,7 +82,7 @@ trait FormatOptions
         null|bool $trellisQuant = null,
         null|bool $overshootDeringing = null,
         null|bool $optimizeScans = null,
-        null|int $quantTable = null
+        null|int $quantTable = null,
     ): self {
         return $this->withOption(OptionName::JpegOptions, [
             $this->boolOrNull($progressive),
@@ -113,13 +121,24 @@ trait FormatOptions
     /**
      * Configure PNG options.
      */
-    public function pngOptions(null|bool $interlaced = null, null|bool $quantize = null, null|int $quantizationColors = null): self
-    {
+    public function pngOptions(
+        null|bool $interlaced = null,
+        null|bool $quantize = null,
+        null|int $quantizationColors = null,
+    ): self {
         return $this->withOption(OptionName::PngOptions, [
             $this->boolOrNull($interlaced),
             $this->boolOrNull($quantize),
             $this->intOrNull($quantizationColors),
         ]);
+    }
+
+    /**
+     * Preserve the source image's high bit depth.
+     */
+    public function preserveHdr(bool $enabled = true): self
+    {
+        return $this->withOption(OptionName::PreserveHdr, [$this->bool($enabled)]);
     }
 
     /**
@@ -133,8 +152,11 @@ trait FormatOptions
     /**
      * Configure WebP options.
      */
-    public function webpOptions(null|string $compression = null, null|bool $smartSubsample = null, null|string $preset = null): self
-    {
+    public function webpOptions(
+        null|string $compression = null,
+        null|bool $smartSubsample = null,
+        null|string $preset = null,
+    ): self {
         return $this->withOption(OptionName::WebpOptions, [
             $compression,
             $this->boolOrNull($smartSubsample),

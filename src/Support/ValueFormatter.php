@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace HosmelQ\Imgproxy\Support;
 
+use InvalidArgumentException;
+
 final class ValueFormatter
 {
     /**
@@ -27,9 +29,27 @@ final class ValueFormatter
      */
     public static function float(float $value): string
     {
-        $formatted = rtrim(rtrim(sprintf('%.12F', $value), '0'), '.');
+        if (! is_finite($value)) {
+            throw new InvalidArgumentException('Numeric option values must be finite.');
+        }
 
-        return $formatted === '-0' ? '0' : $formatted;
+        if ($value === 0.0) {
+            return '0';
+        }
+
+        if ($value === floor($value)) {
+            return sprintf('%.0F', $value);
+        }
+
+        $precision = 1;
+        $decimalPoint = localeconv()['decimal_point'];
+
+        do {
+            $formatted = str_replace($decimalPoint, '.', sprintf('%.*G', $precision, $value));
+            ++$precision;
+        } while ((float) $formatted !== $value && $precision <= 17);
+
+        return $formatted;
     }
 
     /**

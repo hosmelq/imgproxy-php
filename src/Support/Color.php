@@ -16,17 +16,17 @@ final readonly class Color
     /**
      * @param list<string> $arguments
      */
-    private function __construct(private array $arguments)
-    {
-    }
+    private function __construct(private array $arguments) {}
 
     /**
      * Create a color from a hex string.
      */
     public static function fromHex(string $hex): self
     {
-        if (preg_match('/^[0-9a-fA-F]{6}$/', $hex) !== 1) {
-            throw new InvalidArgumentException('Hex color must be a 6-character hexadecimal string.');
+        if (preg_match('/^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/D', $hex) !== 1) {
+            throw new InvalidArgumentException(
+                'Hex color must be a 3- or 6-character hexadecimal string.',
+            );
         }
 
         return new self([strtolower($hex)]);
@@ -39,7 +39,9 @@ final readonly class Color
     {
         foreach (['red' => $red, 'green' => $green, 'blue' => $blue] as $channel => $value) {
             if ($value < 0 || $value > 255) {
-                throw new InvalidArgumentException(sprintf('%s must be between 0 and 255.', ucfirst($channel)));
+                throw new InvalidArgumentException(
+                    sprintf('%s must be between 0 and 255.', ucfirst($channel)),
+                );
             }
         }
 

@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace HosmelQ\Imgproxy\Support;
 
 use HosmelQ\Imgproxy\GravityDirection;
+use InvalidArgumentException;
 
 final readonly class Gravity
 {
     /**
      * @param list<string> $arguments
      */
-    private function __construct(private array $arguments)
-    {
-    }
+    private function __construct(private array $arguments) {}
 
     /**
      * Build directional gravity with optional offsets.
@@ -21,7 +20,7 @@ final readonly class Gravity
     public static function direction(
         GravityDirection $direction,
         float $xOffset = 0.0,
-        float $yOffset = 0.0
+        float $yOffset = 0.0,
     ): self {
         $arguments = [$direction->value];
 
@@ -60,9 +59,6 @@ final readonly class Gravity
     }
 
     /**
-     * @param array<string, float|int> $weights
-     */
-    /**
      * Build object gravity with custom weights.
      *
      * @param array<string, float|int> $weights
@@ -94,6 +90,22 @@ final readonly class Gravity
      */
     public function arguments(): array
     {
+        return $this->arguments;
+    }
+
+    /**
+     * Return arguments supported by the canvas extension options.
+     *
+     * @return list<string>
+     */
+    public function extensionArguments(): array
+    {
+        if (in_array($this->arguments[0], ['sm', 'obj', 'objw'], true)) {
+            throw new InvalidArgumentException(
+                'Canvas extension requires directional or focus-point gravity.',
+            );
+        }
+
         return $this->arguments;
     }
 }
