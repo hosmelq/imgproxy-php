@@ -2,26 +2,14 @@
 
 declare(strict_types=1);
 
+use HosmelQ\PhpCodingStandard\CodingStandard;
+use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\Config\RectorConfig;
-use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 
 return RectorConfig::configure()
-    ->withImportNames()
+    ->withCache('./.cache/rector', FileCacheStorage::class)
     ->withPaths([
         __DIR__.'/src',
         __DIR__.'/tests',
     ])
-    ->withPhpSets(php83: true)
-    ->withPreparedSets(
-        deadCode: true,
-        codeQuality: true,
-        codingStyle: true,
-        typeDeclarations: true,
-        typeDeclarationDocblocks: true,
-        instanceOf: true,
-        earlyReturn: true,
-        rectorPreset: true
-    )
-    ->withSkip([
-        ClosureToArrowFunctionRector::class,
-    ]);
+    ->withSets([CodingStandard::RECTOR_PEST, CodingStandard::RECTOR_PHP]);
