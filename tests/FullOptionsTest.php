@@ -21,18 +21,18 @@ it('builds signed Base64 URL with all options', function (): void {
     expect($url)->toMatchSnapshot();
 });
 
-it('builds signed plain URL with all options', function (): void {
-    $url = fullyConfiguredBuilder()
-        ->build('https://example.com/source.jpg', 'jpg', SourceEncoding::Plain);
-
-    expect($url)->toMatchSnapshot();
-});
-
 it('builds signed encrypted URL with all options', function (): void {
     $builder = fullyConfiguredBuilder()
         ->withEncryptionKey('1eb5b0e971ad7f45324c1bb15c947cb207c43152fa5c6c7f35c4f36e0c18e0f1');
 
     $url = $builder->build('https://example.com/source.jpg', 'jpg', SourceEncoding::Encrypted);
+
+    expect($url)->toMatchSnapshot();
+});
+
+it('builds signed plain URL with all options', function (): void {
+    $url = fullyConfiguredBuilder()
+        ->build('https://example.com/source.jpg', 'jpg', SourceEncoding::Plain);
 
     expect($url)->toMatchSnapshot();
 });

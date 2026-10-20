@@ -5,11 +5,13 @@ declare(strict_types=1);
 use HosmelQ\Imgproxy\EncryptionConfig;
 use HosmelQ\Imgproxy\Exception\InvalidConfig;
 
-it('selects cipher based on key length', function (): void {
-    expect(new EncryptionConfig(str_repeat('a', 16))->cipher())->toBe('aes-128-cbc')
-        ->and(new EncryptionConfig(str_repeat('b', 24))->cipher())->toBe('aes-192-cbc')
-        ->and(new EncryptionConfig(str_repeat('c', 32))->cipher())->toBe('aes-256-cbc');
-});
+it('rejects custom IVs of the wrong length', function (): void {
+    new EncryptionConfig(str_repeat('k', 32), fn (): string => 'short')->encrypt('source');
+})->throws(InvalidArgumentException::class);
+
+it('rejects invalid directly constructed encryption configuration', function (): void {
+    new EncryptionConfig('invalid');
+})->throws(InvalidConfig::class);
 
 it('derives deterministic iv when generator is not provided', function (): void {
     $key = str_repeat('k', 32);
@@ -40,10 +42,8 @@ it('round trips the exact source for every supported AES key length and block bo
     expect($plain)->toBe($source);
 })->with([[16, 15], [24, 16], [32, 17]]);
 
-it('rejects invalid directly constructed encryption configuration', function (): void {
-    new EncryptionConfig('invalid');
-})->throws(InvalidConfig::class);
-
-it('rejects custom IVs of the wrong length', function (): void {
-    new EncryptionConfig(str_repeat('k', 32), fn (): string => 'short')->encrypt('source');
-})->throws(InvalidArgumentException::class);
+it('selects cipher based on key length', function (): void {
+    expect(new EncryptionConfig(str_repeat('a', 16))->cipher())->toBe('aes-128-cbc')
+        ->and(new EncryptionConfig(str_repeat('b', 24))->cipher())->toBe('aes-192-cbc')
+        ->and(new EncryptionConfig(str_repeat('c', 32))->cipher())->toBe('aes-256-cbc');
+});

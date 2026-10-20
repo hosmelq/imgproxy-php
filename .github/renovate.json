@@ -1,8 +1,23 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "zizmorcore/zizmor",
+      "extractVersionTemplate": "^v(?<version>.+)$",
+      "managerFilePatterns": [".github/workflows/zizmor.yml"],
+      "matchStrings": ["version: (?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)"]
+    }
+  ],
   "dependencyDashboard": true,
   "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "packageRules": [
+    {
+      "enabled": false,
+      "matchDepNames": ["ghcr.io/zizmorcore/zizmor"],
+      "matchManagers": ["github-actions"]
+    },
     {
       "matchDepNames": ["pullfrog/pullfrog"],
       "matchManagers": ["github-actions"],
@@ -21,7 +36,7 @@
     },
     {
       "groupName": "github actions",
-      "matchManagers": ["github-actions"]
+      "matchManagers": ["custom.regex", "github-actions"]
     }
   ],
   "rebaseWhen": "conflicted",
