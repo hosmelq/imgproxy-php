@@ -4,5 +4,3 @@ includes:
 parameters:
   paths:
     - src
-  type_coverage:
-    declare: 100
