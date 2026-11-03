@@ -18,6 +18,10 @@
             "email": "hosmelq@gmail.com"
         }
     ],
+    "homepage": "https://github.com/hosmelq/imgproxy-php",
+    "support": {
+        "docs": "https://github.com/hosmelq/imgproxy-php#readme"
+    },
     "require": {
         "php": "^8.4",
         "ext-openssl": "*",
