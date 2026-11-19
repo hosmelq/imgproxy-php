@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Commit to /dev/null
-        uses: nunomaduro/dev-null.sh/.github/actions/commit@aa319e3e2bbea00faddc32e6f5835b5db2d997fc # production
+        uses: nunomaduro/dev-null.sh/.github/actions/commit@6946cfb7195aba884e9e8c0aaa98342fcf5aa246 # production
         with:
           body: |
             ${{ github.event.repository.name }} ${{ github.event.release.tag_name }} is out.
