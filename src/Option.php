@@ -18,8 +18,6 @@ final readonly class Option
     private array $arguments;
 
     /**
-     * Create a new option.
-     *
      * @param list<null|string> $arguments
      */
     public function __construct(public InfoOptionName|OptionName $name, array $arguments)
@@ -87,8 +85,6 @@ final readonly class Option
     }
 
     /**
-     * Remove trailing null arguments.
-     *
      * @param list<null|string> $arguments
      *
      * @return list<string>

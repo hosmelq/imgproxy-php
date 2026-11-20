@@ -40,9 +40,6 @@ final readonly class InfoUrlBuilder
         );
     }
 
-    /**
-     * Enable or disable bands information.
-     */
     public function bands(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::Bands, [$this->bool($enabled)]);
@@ -116,9 +113,6 @@ final readonly class InfoUrlBuilder
         return $this->withOption(InfoOptionName::Classify, [(string) $topK, ...$classes]);
     }
 
-    /**
-     * Enable or disable colorspace information.
-     */
     public function colorspace(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::Colorspace, [$this->bool($enabled)]);
@@ -142,17 +136,11 @@ final readonly class InfoUrlBuilder
         );
     }
 
-    /**
-     * Enable or disable detect objects information.
-     */
     public function detectObjects(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::DetectObjects, [$this->bool($enabled)]);
     }
 
-    /**
-     * Enable or disable dimensions information.
-     */
     public function dimensions(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::Dimensions, [$this->bool($enabled)]);
@@ -180,17 +168,11 @@ final readonly class InfoUrlBuilder
         );
     }
 
-    /**
-     * Configure expires.
-     */
     public function expires(int $timestamp): self
     {
         return $this->withOption(InfoOptionName::Expires, [(string) $timestamp]);
     }
 
-    /**
-     * Enable or disable format information.
-     */
     public function format(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::Format, [$this->bool($enabled)]);
@@ -204,25 +186,16 @@ final readonly class InfoUrlBuilder
         return $this->withOption(InfoOptionName::Hashsum, [$type->value, $hash]);
     }
 
-    /**
-     * Enable or disable iptc information.
-     */
     public function iptc(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::Iptc, [$this->bool($enabled)]);
     }
 
-    /**
-     * Configure max src file size.
-     */
     public function maxSrcFileSize(int $size): self
     {
         return $this->withOption(InfoOptionName::MaxSrcFileSize, [(string) $size]);
     }
 
-    /**
-     * Configure max src resolution.
-     */
     public function maxSrcResolution(float $resolution): self
     {
         return $this->withOption(
@@ -239,17 +212,11 @@ final readonly class InfoUrlBuilder
         return $this->withOption(InfoOptionName::ObjectsPosition, [...$position->arguments()]);
     }
 
-    /**
-     * Configure page.
-     */
     public function page(int $page): self
     {
         return $this->withOption(InfoOptionName::Page, [(string) $page]);
     }
 
-    /**
-     * Enable or disable pages number information.
-     */
     public function pagesNumber(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::PagesNumber, [$this->bool($enabled)]);
@@ -267,9 +234,6 @@ final readonly class InfoUrlBuilder
         return $this->withOption(InfoOptionName::Palette, [(string) $colors]);
     }
 
-    /**
-     * Enable or disable perceptual hash information.
-     */
     public function perceptualHash(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::PerceptualHash, [$this->bool($enabled)]);
@@ -289,49 +253,31 @@ final readonly class InfoUrlBuilder
         return $this->withOption(InfoOptionName::Preset, [...$presets]);
     }
 
-    /**
-     * Enable or disable sample format information.
-     */
     public function sampleFormat(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::SampleFormat, [$this->bool($enabled)]);
     }
 
-    /**
-     * Enable or disable size information.
-     */
     public function size(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::Size, [$this->bool($enabled)]);
     }
 
-    /**
-     * Enable or disable thumb hash information.
-     */
     public function thumbHash(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::ThumbHash, [$this->bool($enabled)]);
     }
 
-    /**
-     * Enable or disable video meta information.
-     */
     public function videoMeta(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::VideoMeta, [$this->bool($enabled)]);
     }
 
-    /**
-     * Enable or disable video thumbnail keyframes information.
-     */
     public function videoThumbnailKeyframes(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::VideoThumbnailKeyframes, [$this->bool($enabled)]);
     }
 
-    /**
-     * Configure video thumbnail second.
-     */
     public function videoThumbnailSecond(float $second): self
     {
         return $this->withOption(
@@ -340,9 +286,6 @@ final readonly class InfoUrlBuilder
         );
     }
 
-    /**
-     * Enable or disable xmp information.
-     */
     public function xmp(bool $enabled = true): self
     {
         return $this->withOption(InfoOptionName::Xmp, [$this->bool($enabled)]);

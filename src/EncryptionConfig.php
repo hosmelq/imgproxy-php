@@ -14,8 +14,6 @@ use InvalidArgumentException;
 final readonly class EncryptionConfig
 {
     /**
-     * Create encryption config.
-     *
      * @param null|Closure(string): string $ivGenerator
      */
     public function __construct(
@@ -40,9 +38,6 @@ final readonly class EncryptionConfig
         };
     }
 
-    /**
-     * Encrypt the source URL.
-     */
     public function encrypt(string $source): string
     {
         $iv = $this->ivFor($source);

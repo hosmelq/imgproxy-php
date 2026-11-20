@@ -16,8 +16,6 @@ use Throwable;
 final class Imgproxy
 {
     /**
-     * Create a new URL builder.
-     *
      * @throws InvalidConfig
      */
     public static function create(
@@ -88,8 +86,6 @@ final class Imgproxy
     }
 
     /**
-     * Decode a hex string or throw a configuration error.
-     *
      * @throws InvalidConfig
      */
     private static function decodeHex(string $hex, string $label): string

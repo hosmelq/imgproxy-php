@@ -18,9 +18,6 @@ final readonly class Color
      */
     private function __construct(private array $arguments) {}
 
-    /**
-     * Create a color from a hex string.
-     */
     public static function fromHex(string $hex): self
     {
         if (preg_match('/^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/D', $hex) !== 1) {
@@ -32,9 +29,6 @@ final readonly class Color
         return new self([strtolower($hex)]);
     }
 
-    /**
-     * Create a color from RGB components.
-     */
     public static function fromRgb(int $red, int $green, int $blue): self
     {
         foreach (['red' => $red, 'green' => $green, 'blue' => $blue] as $channel => $value) {

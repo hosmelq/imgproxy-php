@@ -32,9 +32,6 @@ final readonly class Gravity
         return new self($arguments);
     }
 
-    /**
-     * Build focus point gravity.
-     */
     public static function focusPoint(float $x, float $y): self
     {
         return new self([
@@ -59,8 +56,6 @@ final readonly class Gravity
     }
 
     /**
-     * Build object gravity with custom weights.
-     *
      * @param array<string, float|int> $weights
      */
     public static function objectWithWeights(array $weights): self
@@ -75,9 +70,6 @@ final readonly class Gravity
         return new self($arguments);
     }
 
-    /**
-     * Build smart gravity.
-     */
     public static function smart(): self
     {
         return new self(['sm']);

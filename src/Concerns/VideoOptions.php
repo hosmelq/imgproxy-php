@@ -9,9 +9,6 @@ use HosmelQ\Imgproxy\Support\ValueFormatter;
 
 trait VideoOptions
 {
-    /**
-     * Generate video thumbnail animation.
-     */
     public function videoThumbnailAnimation(
         float $step,
         int $delay,
@@ -38,9 +35,6 @@ trait VideoOptions
         ]);
     }
 
-    /**
-     * Use keyframes for video thumbnails.
-     */
     public function videoThumbnailKeyframes(bool $useKeyframes = true): self
     {
         return $this->withOption(OptionName::VideoThumbnailKeyframes, [$this->bool($useKeyframes)]);

@@ -26,17 +26,11 @@ trait Effects
         ]);
     }
 
-    /**
-     * Set background color.
-     */
     public function background(null|Color $color = null): self
     {
         return $this->withOption(OptionName::Background, $color?->arguments() ?? []);
     }
 
-    /**
-     * Set background alpha.
-     */
     public function backgroundAlpha(float $alpha): self
     {
         return $this->withOption(OptionName::BackgroundAlpha, [ValueFormatter::float($alpha)]);
@@ -77,8 +71,6 @@ trait Effects
     }
 
     /**
-     * Blur detections.
-     *
      * @param list<string> $classes
      */
     public function blurDetections(float $sigma, array $classes = []): self
@@ -89,9 +81,6 @@ trait Effects
         ]);
     }
 
-    /**
-     * Adjust brightness.
-     */
     public function brightness(int $brightness): self
     {
         return $this->withOption(OptionName::Brightness, [(string) $brightness]);
@@ -112,9 +101,6 @@ trait Effects
         ]);
     }
 
-    /**
-     * Set color profile.
-     */
     public function colorProfile(string $profile): self
     {
         return $this->withOption(
@@ -123,17 +109,12 @@ trait Effects
         );
     }
 
-    /**
-     * Adjust contrast.
-     */
     public function contrast(float $contrast): self
     {
         return $this->withOption(OptionName::Contrast, [ValueFormatter::float($contrast)]);
     }
 
     /**
-     * Draw detected objects.
-     *
      * @param list<string> $classes
      */
     public function drawDetections(bool $draw, array $classes = []): self
@@ -144,9 +125,6 @@ trait Effects
         ]);
     }
 
-    /**
-     * Apply duotone effect.
-     */
     public function duotone(
         float $intensity,
         null|string $darkHex = null,
@@ -184,9 +162,6 @@ trait Effects
         ]);
     }
 
-    /**
-     * Apply monochrome effect.
-     */
     public function monochrome(float $intensity, null|string $colorHex = null): self
     {
         return $this->withOption(OptionName::Monochrome, [
@@ -195,25 +170,16 @@ trait Effects
         ]);
     }
 
-    /**
-     * Apply pixelation.
-     */
     public function pixelate(int $size): self
     {
         return $this->withOption(OptionName::Pixelate, [(string) $size]);
     }
 
-    /**
-     * Adjust saturation.
-     */
     public function saturation(float $saturation): self
     {
         return $this->withOption(OptionName::Saturation, [ValueFormatter::float($saturation)]);
     }
 
-    /**
-     * Apply sharpening.
-     */
     public function sharpen(float $sigma): self
     {
         return $this->withOption(OptionName::Sharpen, [ValueFormatter::float($sigma)]);
@@ -227,9 +193,6 @@ trait Effects
         return $this->withOption(OptionName::Style, [ValueFormatter::base64UrlEncode($css)]);
     }
 
-    /**
-     * Configure unsharp masking.
-     */
     public function unsharpMasking(
         null|string $mode = null,
         null|float $weight = null,

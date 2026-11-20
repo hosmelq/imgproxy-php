@@ -7,10 +7,11 @@ use PhpCsFixer\Fixer\Alias\MbStrFunctionsFixer;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 
 return ECSConfig::configure()
-    ->withCache(__DIR__.'/.cache/ecs')
+    ->withCache('./.cache/ecs')
     ->withPaths([__DIR__.'/src', __DIR__.'/tests'])
+    ->withRootFiles()
     ->withSets([CodingStandard::ECS_PHP])
     ->withSkip([
-        // URL and cryptographic operations require byte-based string functions.
+        // Keys, IVs, digests and encoded sources are byte strings.
         MbStrFunctionsFixer::class,
     ]);

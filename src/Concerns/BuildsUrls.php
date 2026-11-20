@@ -20,8 +20,6 @@ use Throwable;
 trait BuildsUrls
 {
     /**
-     * Create a new builder instance.
-     *
      * @param list<null|Option> $options
      * @param array<string, string> $optionAliases
      */
@@ -54,25 +52,16 @@ trait BuildsUrls
         }
     }
 
-    /**
-     * Get normalized base URL.
-     */
     private function baseUrl(): string
     {
         return rtrim($this->baseUrl, '/');
     }
 
-    /**
-     * Convert boolean to imgproxy flag.
-     */
     private function bool(bool $value): string
     {
         return ValueFormatter::flag($value);
     }
 
-    /**
-     * Convert optional boolean to string.
-     */
     private function boolOrNull(null|bool $value): null|string
     {
         return is_null($value) ? null : $this->bool($value);
@@ -127,8 +116,6 @@ trait BuildsUrls
     }
 
     /**
-     * Clone builder with overrides.
-     *
      * @param null|list<null|Option> $options
      * @param null|array<string, string> $optionAliases
      */
@@ -163,8 +150,6 @@ trait BuildsUrls
     }
 
     /**
-     * Decode a hex string or throw a configuration error.
-     *
      * @throws InvalidConfig
      */
     private function decodeHex(string $hex, string $label): string
@@ -221,9 +206,6 @@ trait BuildsUrls
             );
     }
 
-    /**
-     * Encode configured processing options.
-     */
     private function encodeOptions(): string
     {
         $segments = [];
@@ -278,9 +260,6 @@ trait BuildsUrls
         return implode('/', $segments);
     }
 
-    /**
-     * Encode source using plain URL mode.
-     */
     private function encodePlainSource(string $sourceUrl, null|string $extension): string
     {
         $encoded = rawurlencode($sourceUrl);
@@ -292,9 +271,6 @@ trait BuildsUrls
         return 'plain/'.$encoded.'@'.$extension;
     }
 
-    /**
-     * Encode source depending on the selected strategy.
-     */
     private function encodeSource(
         string $sourceUrl,
         SourceEncoding $encoding,
@@ -307,25 +283,16 @@ trait BuildsUrls
         };
     }
 
-    /**
-     * Convert float to string or null.
-     */
     private function floatOrNull(null|float $value): null|string
     {
         return is_null($value) ? null : ValueFormatter::float($value);
     }
 
-    /**
-     * Convert int to string or null.
-     */
     private function intOrNull(null|int $value): null|string
     {
         return is_null($value) ? null : (string) $value;
     }
 
-    /**
-     * Calculate URL signature.
-     */
     private function signature(string $path): string
     {
         if ($this->trustedSignature !== '') {
@@ -346,8 +313,6 @@ trait BuildsUrls
     }
 
     /**
-     * Store an option value.
-     *
      * @param list<null|string> $arguments
      */
     private function withOption(InfoOptionName|OptionName $name, array $arguments): self

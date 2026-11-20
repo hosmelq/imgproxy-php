@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace HosmelQ\Imgproxy;
 
-/**
- * Hashsum types supported by imgproxy.
- */
 enum HashsumType: string
 {
     case Md5 = 'md5';

@@ -31,9 +31,6 @@ final readonly class ObjectsPosition
         return new self($arguments);
     }
 
-    /**
-     * Position objects using focus point.
-     */
     public static function focusPoint(float $x, float $y): self
     {
         return new self([

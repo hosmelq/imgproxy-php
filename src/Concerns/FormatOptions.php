@@ -9,9 +9,6 @@ use InvalidArgumentException;
 
 trait FormatOptions
 {
-    /**
-     * Configure autoquality.
-     */
     public function autoquality(
         null|string $method = null,
         null|float $target = null,
@@ -28,17 +25,11 @@ trait FormatOptions
         ]);
     }
 
-    /**
-     * Configure AVIF options.
-     */
     public function avifOptions(null|string $subsample = null): self
     {
         return $this->withOption(OptionName::AvifOptions, [$subsample]);
     }
 
-    /**
-     * Disable animation handling.
-     */
     public function disableAnimation(bool $disable = true): self
     {
         return $this->withOption(OptionName::DisableAnimation, [$this->bool($disable)]);
@@ -53,8 +44,6 @@ trait FormatOptions
     }
 
     /**
-     * Configure format-specific qualities.
-     *
      * @param array<string, int> $formatQualities
      */
     public function formatQuality(array $formatQualities): self
@@ -73,9 +62,6 @@ trait FormatOptions
         return $this->withOption(OptionName::FormatQuality, $arguments);
     }
 
-    /**
-     * Configure JPEG options.
-     */
     public function jpegOptions(
         null|bool $progressive = null,
         null|bool $noSubsample = null,
@@ -110,17 +96,11 @@ trait FormatOptions
         return $this->withOption(OptionName::Page, [(string) $page]);
     }
 
-    /**
-     * Select pages count.
-     */
     public function pages(int $pages): self
     {
         return $this->withOption(OptionName::Pages, [(string) $pages]);
     }
 
-    /**
-     * Configure PNG options.
-     */
     public function pngOptions(
         null|bool $interlaced = null,
         null|bool $quantize = null,
@@ -141,17 +121,11 @@ trait FormatOptions
         return $this->withOption(OptionName::PreserveHdr, [$this->bool($enabled)]);
     }
 
-    /**
-     * Set output quality.
-     */
     public function quality(int $quality): self
     {
         return $this->withOption(OptionName::Quality, [(string) $quality]);
     }
 
-    /**
-     * Configure WebP options.
-     */
     public function webpOptions(
         null|string $compression = null,
         null|bool $smartSubsample = null,

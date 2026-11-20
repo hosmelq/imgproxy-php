@@ -74,9 +74,6 @@ trait ResizingOptions
         return $this->withOption(OptionName::Dpr, [ValueFormatter::float($dpr)]);
     }
 
-    /**
-     * Allow enlarging images.
-     */
     public function enlarge(bool $enlarge = true): self
     {
         return $this->withOption(OptionName::Enlarge, [$this->bool($enlarge)]);
@@ -110,9 +107,6 @@ trait ResizingOptions
         return $this->withOption(OptionName::ExtendAspectRatio, $arguments);
     }
 
-    /**
-     * Flip image.
-     */
     public function flip(null|bool $horizontal = null, null|bool $vertical = null): self
     {
         return $this->withOption(OptionName::Flip, [
@@ -121,49 +115,31 @@ trait ResizingOptions
         ]);
     }
 
-    /**
-     * Set gravity.
-     */
     public function gravity(Gravity $gravity): self
     {
         return $this->withOption(OptionName::Gravity, $gravity->arguments());
     }
 
-    /**
-     * Set resulting height.
-     */
     public function height(int $height): self
     {
         return $this->withOption(OptionName::Height, [(string) $height]);
     }
 
-    /**
-     * Set minimum height.
-     */
     public function minHeight(int $height): self
     {
         return $this->withOption(OptionName::MinHeight, [(string) $height]);
     }
 
-    /**
-     * Set minimum width.
-     */
     public function minWidth(int $width): self
     {
         return $this->withOption(OptionName::MinWidth, [(string) $width]);
     }
 
-    /**
-     * Set objects position adjustments.
-     */
     public function objectsPosition(ObjectsPosition $position): self
     {
         return $this->withOption(OptionName::ObjectsPosition, $position->arguments());
     }
 
-    /**
-     * Apply padding.
-     */
     public function padding(
         null|int $top = null,
         null|int $right = null,
@@ -209,33 +185,21 @@ trait ResizingOptions
         ]);
     }
 
-    /**
-     * Define resizing algorithm.
-     */
     public function resizingAlgorithm(ResizingAlgorithm $algorithm): self
     {
         return $this->withOption(OptionName::ResizingAlgorithm, [$algorithm->value]);
     }
 
-    /**
-     * Define resizing type.
-     */
     public function resizingType(ResizingType $type): self
     {
         return $this->withOption(OptionName::ResizingType, [$type->value]);
     }
 
-    /**
-     * Rotate image.
-     */
     public function rotate(int $angle): self
     {
         return $this->withOption(OptionName::Rotate, [(string) $angle]);
     }
 
-    /**
-     * Set resulting size.
-     */
     public function size(
         null|int $width = null,
         null|int $height = null,
@@ -284,17 +248,11 @@ trait ResizingOptions
         ]);
     }
 
-    /**
-     * Set resulting width.
-     */
     public function width(int $width): self
     {
         return $this->withOption(OptionName::Width, [(string) $width]);
     }
 
-    /**
-     * Apply zoom factors.
-     */
     public function zoom(float $x, null|float $y = null): self
     {
         return $this->withOption(OptionName::Zoom, [

@@ -98,33 +98,21 @@ trait EncodingOptions
         return $this->copy(sourceEncoding: SourceEncoding::Base64);
     }
 
-    /**
-     * Use encrypted sources.
-     */
     public function useEncryptedSource(): self
     {
         return $this->copy(sourceEncoding: SourceEncoding::Encrypted);
     }
 
-    /**
-     * Emit long option names.
-     */
     public function useLongOptions(): self
     {
         return $this->copy(useShortOptions: false);
     }
 
-    /**
-     * Use plain encoded sources.
-     */
     public function usePlainSource(): self
     {
         return $this->copy(sourceEncoding: SourceEncoding::Plain);
     }
 
-    /**
-     * Emit short option names.
-     */
     public function useShortOptions(bool $enabled = true): self
     {
         return $this->copy(useShortOptions: $enabled);
@@ -135,7 +123,6 @@ trait EncodingOptions
      */
     public function withEncryptionKey(string $key, null|Closure $ivGenerator = null): self
     {
-        /** @var string $key */
         $key = $this->decodeHex($key, 'encryption key');
         $config = new EncryptionConfig($key, $ivGenerator);
 

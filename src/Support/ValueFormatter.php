@@ -46,15 +46,13 @@ final class ValueFormatter
 
         do {
             $formatted = str_replace($decimalPoint, '.', sprintf('%.*G', $precision, $value));
+
             ++$precision;
         } while ((float) $formatted !== $value && $precision <= 17);
 
         return $formatted;
     }
 
-    /**
-     * Cast integer to string.
-     */
     public static function int(int $value): string
     {
         return (string) $value;

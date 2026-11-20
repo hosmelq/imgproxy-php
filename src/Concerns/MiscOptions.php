@@ -11,9 +11,6 @@ use InvalidArgumentException;
 
 trait MiscOptions
 {
-    /**
-     * Add cache buster.
-     */
     public function cachebuster(string $value): self
     {
         return $this->withOption(
@@ -38,17 +35,11 @@ trait MiscOptions
         return $this->withOption(OptionName::EnforceThumbnail, [$this->bool($enforce)]);
     }
 
-    /**
-     * Set expiry timestamp.
-     */
     public function expires(int $timestamp): self
     {
         return $this->withOption(OptionName::Expires, [(string) $timestamp]);
     }
 
-    /**
-     * Use fallback image URL.
-     */
     public function fallbackImageUrl(string $url): self
     {
         return $this->withOption(
@@ -90,9 +81,6 @@ trait MiscOptions
         return $this->withOption(OptionName::KeepCopyright, [$this->bool($keep)]);
     }
 
-    /**
-     * Limit animation frame resolution.
-     */
     public function maxAnimationFrameResolution(float $resolution): self
     {
         return $this->withOption(
@@ -101,33 +89,21 @@ trait MiscOptions
         );
     }
 
-    /**
-     * Limit animation frames.
-     */
     public function maxAnimationFrames(int $frames): self
     {
         return $this->withOption(OptionName::MaxAnimationFrames, [(string) $frames]);
     }
 
-    /**
-     * Limit result dimension.
-     */
     public function maxResultDimension(int $dimension): self
     {
         return $this->withOption(OptionName::MaxResultDimension, [(string) $dimension]);
     }
 
-    /**
-     * Limit source file size.
-     */
     public function maxSrcFileSize(int $size): self
     {
         return $this->withOption(OptionName::MaxSrcFileSize, [(string) $size]);
     }
 
-    /**
-     * Limit source resolution.
-     */
     public function maxSrcResolution(float $resolution): self
     {
         return $this->withOption(
@@ -137,8 +113,6 @@ trait MiscOptions
     }
 
     /**
-     * Apply presets.
-     *
      * @param list<string> $presets
      */
     public function preset(array $presets): self
@@ -158,17 +132,12 @@ trait MiscOptions
         return $this->withOption(OptionName::Raw, [$this->bool($raw)]);
     }
 
-    /**
-     * Return as attachment.
-     */
     public function returnAttachment(bool $returnAttachment = true): self
     {
         return $this->withOption(OptionName::ReturnAttachment, [$this->bool($returnAttachment)]);
     }
 
     /**
-     * Skip processing for specific extensions.
-     *
      * @param list<string> $extensions
      */
     public function skipProcessing(array $extensions): self
@@ -180,17 +149,11 @@ trait MiscOptions
         return $this->withOption(OptionName::SkipProcessing, $extensions);
     }
 
-    /**
-     * Strip color profile.
-     */
     public function stripColorProfile(bool $strip = true): self
     {
         return $this->withOption(OptionName::StripColorProfile, [$this->bool($strip)]);
     }
 
-    /**
-     * Strip metadata.
-     */
     public function stripMetadata(bool $strip = true): self
     {
         return $this->withOption(OptionName::StripMetadata, [$this->bool($strip)]);

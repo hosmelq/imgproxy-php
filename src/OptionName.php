@@ -111,9 +111,6 @@ enum OptionName: string
         return array_values(array_unique([$this->value, $this->name(true), ...$extra]));
     }
 
-    /**
-     * Resolve option name considering short names.
-     */
     public function name(bool $useShort): string
     {
         if (! $useShort) {

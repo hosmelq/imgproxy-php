@@ -172,7 +172,11 @@ it('keeps output format as an ordered option unless an explicit final extension 
 
 it('keeps presets and repeated options in their requested order', function (): void {
     $url = Imgproxy::create('https://imgproxy.test')
-        ->height(100)->preset(['first'])->height(200)->preset(['second'])->height(300)
+        ->height(100)
+        ->preset(['first'])
+        ->height(200)
+        ->preset(['second'])
+        ->height(300)
         ->build('source');
 
     expect($url)->toContain('/height:100/preset:first/height:200/preset:second/height:300/');
@@ -258,7 +262,11 @@ it('supports extension gravity in resize meta options', function (): void {
 
 it('supports independent options in chained pipelines', function (): void {
     $url = Imgproxy::create('https://imgproxy.test')
-        ->width(500)->watermarkText('first')->nextPipeline()->width(200)->watermarkText('second')
+        ->width(500)
+        ->watermarkText('first')
+        ->nextPipeline()
+        ->width(200)
+        ->watermarkText('second')
         ->build('source');
 
     expect($url)->toContain(
